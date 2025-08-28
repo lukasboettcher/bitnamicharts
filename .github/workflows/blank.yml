@@ -18,7 +18,7 @@ jobs:
       - name: Checkout source chart repo
         uses: actions/checkout@v4
         with:
-          repository: your-org/source-chart-repo
+          repository: bitnami/charts
           path: source-chart
 
       - name: Set up Helm
