@@ -54,7 +54,7 @@ jobs:
 
       - name: helm dependency build
         run: |
-          helm dependecy build ./charts/thanos
+          helm dependency build ./charts/thanos
       - name: helm lint
         run: |
           helm lint ./charts/thanos
