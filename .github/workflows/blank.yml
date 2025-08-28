@@ -43,11 +43,12 @@ jobs:
           yq -i ".image.registry = \"quay.io\"" values.yaml
           yq -i ".image.repository = \"thanos/thanos\"" values.yaml
           yq -i ".image.tag = \"$APP_VERSION\"" values.yaml
+          yq -i ".global.security.allowInsecureImages = \"true\"" values.yaml
 
       - name: Commit updated chart back to this repo
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add charts/thanos
           git commit -m "Update chart with appVersion $(yq '.appVersion' charts/thanos/Chart.yaml)" || echo "No changes to commit"
           git push
