@@ -1,0 +1,63 @@
+name: Publish Helm Chart
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # every day at 06:00 UTC
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Checkout source chart repo
+        uses: actions/checkout@v4
+        with:
+          repository: your-org/source-chart-repo
+          path: source-chart
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.15.0
+
+      - name: Install yq
+        run: sudo snap install yq
+
+      - name: Copy chart to this repo
+        run: |
+          mkdir -p charts/
+          cp -r source-chart/bitnami/thanos charts/thanos
+
+      - name: Patch values.yaml with appVersion
+        run: |
+          cd charts/thanos
+          APP_VERSION=$(yq '.appVersion' Chart.yaml)
+          echo "Detected appVersion=$APP_VERSION"
+          yq -i ".image.tag = \"$APP_VERSION\"" values.yaml
+
+      - name: Commit updated chart back to this repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add charts/thanos
+          git commit -m "Update chart with appVersion $(yq '.appVersion' charts/thanos/Chart.yaml)" || echo "No changes to commit"
+          git push
+
+      - name: helm lint
+        run: |
+          helm lint ./charts/thanos
+      - name: helm login
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ghcr.io -u $ --password-stdin
+      - name: helm package
+        run: |
+          helm package ./charts/thanos --version $(yq '.appVersion' charts/thanos/Chart.yaml)
+      - name: helm push
+        run: |
+          helm push thanos-$(yq '.appVersion' charts/thanos/Chart.yaml).tgz oci://ghcr.io/${{ github.repository_owner }}
