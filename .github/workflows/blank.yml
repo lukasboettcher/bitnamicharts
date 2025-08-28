@@ -52,6 +52,9 @@ jobs:
           git commit -m "Update chart with appVersion $(yq '.appVersion' charts/thanos/Chart.yaml)" || echo "No changes to commit"
           git push
 
+      - name: helm dependency build
+        run: |
+          helm dependecy build ./charts/thanos
       - name: helm lint
         run: |
           helm lint ./charts/thanos
