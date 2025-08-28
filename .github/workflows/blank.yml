@@ -40,8 +40,8 @@ jobs:
           cd charts/thanos
           APP_VERSION=$(yq '.appVersion' Chart.yaml)
           echo "Detected appVersion=$APP_VERSION"
-          yq -i ".image.registry = quay.io" values.yaml
-          yq -i ".image.repository = thanos/thanos" values.yaml
+          yq -i ".image.registry = \"quay.io\"" values.yaml
+          yq -i ".image.repository = \"thanos/thanos\"" values.yaml
           yq -i ".image.tag = \"$APP_VERSION\"" values.yaml
 
       - name: Commit updated chart back to this repo
