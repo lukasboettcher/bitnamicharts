@@ -42,7 +42,7 @@ jobs:
           echo "Detected appVersion=$APP_VERSION"
           yq -i ".image.registry = \"quay.io\"" values.yaml
           yq -i ".image.repository = \"thanos/thanos\"" values.yaml
-          yq -i ".image.tag = \"$APP_VERSION\"" values.yaml
+          yq -i ".image.tag = \"v$APP_VERSION\"" values.yaml
           yq -i ".global.security.allowInsecureImages = \"true\"" values.yaml
 
       - name: Commit updated chart back to this repo
